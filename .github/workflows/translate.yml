@@ -1,0 +1,25 @@
+name: Translate Paper
+on:
+  workflow_dispatch:                 # Actions 탭에서 "Run workflow" 버튼으로 수동 실행
+    inputs:
+      content_list:
+        description: "content_list.json 경로"
+        required: true
+        default: out/paper/paper_content_list.json
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install google-genai
+      - name: Translate
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python paper_translator.py "${{ github.event.inputs.content_list }}" -o paper_ko.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paper_ko_html
+          path: paper_ko.html
