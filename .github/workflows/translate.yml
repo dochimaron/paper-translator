@@ -1,11 +1,11 @@
 name: Translate Paper
 on:
-  workflow_dispatch:                 # Actions 탭에서 "Run workflow" 버튼으로 수동 실행
+  workflow_dispatch:
     inputs:
-      content_list:
-        description: "content_list.json 경로"
+      pdf:
+        description: "번역할 PDF 파일 이름 (예: paper.pdf)"
         required: true
-        default: out/paper/paper_content_list.json
+        default: paper.pdf
 jobs:
   translate:
     runs-on: ubuntu-latest
@@ -14,11 +14,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install google-genai
-      - name: Translate
+      - run: pip install google-genai mineru
+      - name: PDF 분석 (MinerU)
+        run: mineru -p "${{ github.event.inputs.pdf }}" -o ./out
+      - name: 번역 HTML 만들기
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python paper_translator.py "${{ github.event.inputs.content_list }}" -o paper_ko.html
+        run: |
+          CL=$(find ./out -name '*_content_list.json' | head -n1)
+          echo "찾은 파일: $CL"
+          python paper_translator.py "$CL" -o paper_ko.html
       - uses: actions/upload-artifact@v4
         with:
           name: paper_ko_html
