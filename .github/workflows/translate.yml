@@ -14,9 +14,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install google-genai mineru
+      - run: pip install google-genai "mineru[core]"
       - name: PDF 분석 (MinerU)
-        run: mineru -p "${{ github.event.inputs.pdf }}" -o ./out
+        run: mineru -p "${{ github.event.inputs.pdf }}" -o ./out -b pipeline
       - name: 번역 HTML 만들기
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
